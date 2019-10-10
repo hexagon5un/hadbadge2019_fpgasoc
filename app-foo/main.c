@@ -33,12 +33,12 @@ void main(int argc, char **argv) {
 	//soon as main() returns, however, we will go back to the IPL.
 	
 	//Blank out fb while we're loading stuff by disabling all layers. This just shows the background color.
-	GFX_REG(GFX_BGNDCOL_REG)=0x802020; //a soft gray
+	GFX_REG(GFX_BGNDCOL_REG)=0x202040; //a soft gray
 	GFX_REG(GFX_LAYEREN_REG)=0; //disable all gfx layers
 	
 	//First, allocate some memory for the background framebuffer. We're gonna dump a fancy image into it. The image is
 	//going to be 8-bit, so we allocate 1 byte per pixel.
-	fbmem=calloc(FB_WIDTH,FB_HEIGHT);
+	/* fbmem=calloc(FB_WIDTH,FB_HEIGHT); */
 	
 	//Tell the GFX hardware to use this, and its pitch. We also tell the GFX hardware to use palette entries starting
 	//from 0 for the frame buffer.

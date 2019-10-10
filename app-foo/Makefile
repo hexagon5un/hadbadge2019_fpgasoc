@@ -1,4 +1,5 @@
 #This is an example Makefile to build the 'Hello world' example.
+all: flash
 
 #The name of the app. The resulting file will be called APPNAME.elf.
 APPNAME = foo
@@ -28,8 +29,9 @@ APPSSDK_DIR ?= ../apps-sdk
 include $(APPSSDK_DIR)/sdk.mk
 
 flash: foo.elf
-	mountSD
-	cp foo.elf ~/pendrive
-	umountSD
+	sudo mount -o user,umask=000,utf8 /dev/sdd1 badgemount
+	cp foo.elf badgemount 
+	sync
+	sudo umount badgemount
 	-echo DONE
 
