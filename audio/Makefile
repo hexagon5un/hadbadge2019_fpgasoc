@@ -1,6 +1,6 @@
 PROJ=audio
-# MODULES := button_number.v dac.v
-MODULES := dac.v
+MODULES := button_number.v dac.v
+# MODULES := dac.v
 CONSTR=had19_proto2.lpf
 TRELLIS=/usr/share/trellis
 
