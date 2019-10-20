@@ -1,3 +1,6 @@
+`include "dac.v"
+`include "button_number.v"
+
 module top( 
 	input clk, 
 	input [7:0] btn, 
