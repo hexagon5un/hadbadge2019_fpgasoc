@@ -26,10 +26,10 @@ flash:
 	tinyprog -p ${PROJ}.bit -a 0x180000
 
 
-sim: ${TEST}.v  ${TEST}_tb.v 
-	iverilog -Wall -o${TEST} ${TEST}.v ${TEST}_tb.v 
-	vvp ${TEST}
-	gtkwave dump.vcd config.gtkw
+sim: ${DUT}.v  ${DUT}_tb.v 
+	iverilog -Wall -o${DUT} ${DUT}.v ${DUT}_tb.v 
+	vvp ${DUT}
+	gtkwave dump.vcd config.gtkw &
 
 .PHONY: prog clean
 .PRECIOUS: ${PROJ}.json ${PROJ}_out.config
