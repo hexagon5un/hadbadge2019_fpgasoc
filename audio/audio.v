@@ -31,7 +31,7 @@ dac #(.BITDEPTH(BITDEPTH)) mydac (
 	.out (pwmout) // connect to PWM pin
 );
 
-`define CALC_INCREMENT(hz) $rtoi(hz * 2**(BITDEPTH+BITFRACTION)/SAMPLEFREQ)
+`define CALC_INCREMENT(hz) $rtoi(hz * 2**(BITDEPTH+BITFRACTION)/SAMPLEFREQ*2)
  wire [3:0] button; 
  button_number my_button_number( 
  	.clk (clk), 
@@ -61,7 +61,8 @@ reg [18:0] increment = 2**18-1 ;  // determines pitch =
 oscillator #( .BITDEPTH(BITDEPTH), .BITFRACTION(BITFRACTION)) mysaw 
 (
 	.sample_clock(sample_clock),
-	.increment(increment) ,  
+	.increment(33554) ,  
+	.voice_select(button+1),
 	.out (mix)
 );
 
