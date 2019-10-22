@@ -1,18 +1,16 @@
-`timescale 10ns/1ns
+`timescale 100ns/10ns
 module test();
 localparam SAMPLEFREQ = 8000000 / 2**8;
 localparam BD=12;
 
-reg [BD-1:0] pcm;
-wire out;
+reg [18:0] increment;
+wire [BD-1:0] out;
 
 initial begin
 	$dumpvars(0,test);
 	$display("Go!");
 	// $monitor();
 end
-initial #40000 $finish;
-
 /* Clocks */
 reg clk = 0;
 always 
@@ -26,20 +24,19 @@ always @(posedge clk) begin
 end
 
 /* Wires, registers, and module here */
-dac #(.BITDEPTH(BD)) dut (
-	.clk(clk),
+oscillator #( .BITDEPTH(12), .BITFRACTION(12)) testsaw (
 	.sample_clock(sample_clock),
-	.pcm(pcm),
+	.increment(increment), 
 	.out(out)
 );
 
 initial begin
-	pcm = 0;
-	#10000 pcm = 2**6;
-	#20000 pcm = 2**8;
-	#30000 pcm = 2**BD - 1;
+	increment = 0;
+	#100000 increment = 2**4;
+	#300000 increment = 2**13;
+	#2000000 $finish;
+
+
 end
-
-
 
 endmodule // test

@@ -12,13 +12,12 @@ module top(
 );
 /* Button and audio workout */
 
-localparam BITDEPTH   = 12;
-localparam BITFRACTION   = 12;
+localparam BITDEPTH    = 12;
+localparam BITFRACTION = 8;
+localparam SAMPLEFREQ  = 8000000 / 2**8;
 
-
-localparam SAMPLEFREQ = 8000000 / 2**8;
-reg sample_clock;
-reg [8:0] sample_count;
+reg sample_clock       = 0;
+reg [8:0] sample_count = 0;
 always @(posedge clk) begin
 	sample_count <= sample_count + 1;
 	sample_clock <= sample_count[8];
@@ -32,15 +31,33 @@ dac #(.BITDEPTH(BITDEPTH)) mydac (
 	.out (pwmout) // connect to PWM pin
 );
 
-wire [3:0] button;
-button_number my_button_number(
-	.clk (clk),
-	.btn (btn), 
-	.button (button)
-);
+`define CALC_INCREMENT(hz) $rtoi(hz * 2**(BITDEPTH+BITFRACTION)/SAMPLEFREQ)
+ wire [3:0] button; 
+ button_number my_button_number( 
+ 	.clk (clk), 
+ 	.btn (btn),  
+ 	.button (button) 
+ ); 
+//frequencies = [261.6256, 293.6648, 329.6276, 349.2282, 391.9954, 440.0000, 493.8833]
+ always @(posedge clk) begin 
+ 	case (button) 
+ 		0: begin increment <= `CALC_INCREMENT(261.6256); end 
+ 		1: begin increment <= `CALC_INCREMENT(293.6648); end 
+ 		2: begin increment <= `CALC_INCREMENT(329.6276); end 
+ 		3: begin increment <= `CALC_INCREMENT(349.2282); end 
+ 		4: begin increment <= `CALC_INCREMENT(391.9954); end 
+ 		5: begin increment <= `CALC_INCREMENT(440.0000); end 
+ 		6: begin increment <= `CALC_INCREMENT(493.8833); end 
+ 		7: begin increment <= `CALC_INCREMENT(261.6256*2); end 
+ 		default: begin increment <= 0; end 
+ 	endcase 
+ end 
 
 
-reg [18:0] increment ;  // determines pitch = f*2**28/maxclock
+ assign led[3:0] = button; 
+
+
+reg [18:0] increment = 2**18-1 ;  // determines pitch = 
 oscillator #( .BITDEPTH(BITDEPTH), .BITFRACTION(BITFRACTION)) mysaw 
 (
 	.sample_clock(sample_clock),
@@ -48,23 +65,5 @@ oscillator #( .BITDEPTH(BITDEPTH), .BITFRACTION(BITFRACTION)) mysaw
 	.out (mix)
 );
 
-//frequencies = [261.6256, 293.6648, 329.6276, 349.2282, 391.9954, 440.0000, 493.8833]
-`define CALC_INCREMENT(hz) $rtoi(hz * 2**(BITDEPTH+BITFRACTION)/SAMPLEFREQ)
-always @(posedge clk) begin
-	case (button)
-		0: begin increment <= `CALC_INCREMENT(261.6256); end
-		1: begin increment <= `CALC_INCREMENT(293.6648); end
-		2: begin increment <= `CALC_INCREMENT(329.6276); end
-		3: begin increment <= `CALC_INCREMENT(349.2282); end
-		4: begin increment <= `CALC_INCREMENT(391.9954); end
-		5: begin increment <= `CALC_INCREMENT(440.0000); end
-		6: begin increment <= `CALC_INCREMENT(493.8833); end
-		7: begin increment <= `CALC_INCREMENT(261.6256*2); end
-		default: begin increment <= 0; end
-	endcase
-end
-
-
-assign led[3:0] = button;
 endmodule
 
