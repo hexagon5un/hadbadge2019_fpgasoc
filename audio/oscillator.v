@@ -5,7 +5,7 @@ module oscillator
 	parameter BITFRACTION   = 8
 ) (
 	input sample_clock,
-	input [18:0] increment,  
+	input [20:0] increment,  
 	input [3:0] voice_select,
 	output [BITDEPTH-1:0] out 
 
