@@ -6,8 +6,8 @@ CONSTR=had19_proto2.lpf
 TRELLIS=/usr/share/trellis
 
 
-all: ${PROJ}.svf flash
-# all: sim
+# all: ${PROJ}.svf flash
+all: sim
 
 %.json: %.v ${INCLUDES} 
 	yosys -p "synth_ecp5 -json $@" $< 

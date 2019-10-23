@@ -2,6 +2,8 @@
 `include "oscillator.v"
 `include "amplifier.v"
 `include "envelope.v"
+`include "sample_clock.v"
+
 
 module top( 
 	input clk, 
@@ -13,14 +15,13 @@ module top(
 
 localparam BITDEPTH    = 14;
 localparam BITFRACTION = 6;
-localparam SAMPLEFREQ  = 8000000 / 2**8;  // 31,250 Hz or 32 us
+localparam SAMPLECLOCK_DIV = 8;
+localparam SAMPLEFREQ  = 8000000 / 2**SAMPLECLOCK_DIV;  // 31,250 Hz or 32 us
 
-reg sample_clock       = 0;
-reg [7:0] sample_count = 0;
-always @(posedge clk) begin
-	sample_count <= sample_count + 1;
-	sample_clock <= sample_count[7];
-end
+wire sample_clock;
+sample_clock #( .SAMPLECLOCK_DIV(SAMPLECLOCK_DIV) ) mysampleclock ( 
+	.clk(clk), .sample_clock(sample_clock) 
+);
 
 `define CALC_INCREMENT(hz) $rtoi(hz * 2**(BITDEPTH+BITFRACTION)/SAMPLEFREQ*2)
 reg [20:0] increment = `CALC_INCREMENT(262) ; 
