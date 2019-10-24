@@ -46,7 +46,7 @@ ar #(
 	.sample_clock(sample_clock),
 	.in(osc_out),
 	.envelope_attack(8'hf0),
-	.envelope_decay(8'hf0),
+	.envelope_decay(8'h30),
 	.gate(gate),
 	.out(out)
 );
@@ -54,9 +54,9 @@ ar #(
 
 initial begin
 
-	#1000000 gate = 1;
-	#10000000 gate = 0;
-	#20000000 $finish;
+	#10000000 gate = 1;
+	#20000000 gate = 0;
+	#50000000 $finish;
 end
 
 endmodule // test
