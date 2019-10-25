@@ -22,8 +22,9 @@ localparam SAMPLEFREQ  = 8000000 / 2**SAMPLECLOCK_DIV;  // 31,250 Hz or 32 us
 
 wire sample_clock;
 sample_clock #( .SAMPLECLOCK_DIV(SAMPLECLOCK_DIV) ) mysampleclock ( 
-	.clk(clk), .sample_clock(sample_clock) 
+	.clk(clk), .rst(rst), .sample_clock(sample_clock) 
 );
+reg rst = 0;
 
 `define CALC_INCREMENT(hz) $rtoi(hz * 2**(BITDEPTH+BITFRACTION)/SAMPLEFREQ*2)
 `define MIDI_NOTE(n) $rtoi(440 * 2**((n-69)/12) * 2**(BITDEPTH+BITFRACTION)/SAMPLEFREQ*2)
@@ -60,6 +61,7 @@ end
 
 voice osc1 (
 	.sample_clock(sample_clock),
+	.rst(rst),
 	.voice_select(voice),
   	.pitch_increment(`MIDI_NOTE(60)),
   	.envelope_attack(8'h70),
@@ -69,6 +71,7 @@ voice osc1 (
 );
 voice osc2 (
 	.sample_clock(sample_clock),
+	.rst(rst),
 	.voice_select(voice),
   	.pitch_increment(`MIDI_NOTE(62)),
   	.envelope_attack(8'h70),
@@ -78,6 +81,7 @@ voice osc2 (
 );
 voice osc3 (
 	.sample_clock(sample_clock),
+	.rst(rst),
 	.voice_select(voice),
   	.pitch_increment(`MIDI_NOTE(64)),
   	.envelope_attack(8'h70),
@@ -87,6 +91,7 @@ voice osc3 (
 );
 voice osc4 (
 	.sample_clock(sample_clock),
+	.rst(rst),
 	.voice_select(voice),
   	.pitch_increment(`MIDI_NOTE(65)),
   	.envelope_attack(8'h70),
@@ -106,6 +111,7 @@ mixer4 mixer (
 
 dac #(.BITDEPTH(BITDEPTH)) mydac (
 	.clk (clk),
+	.rst(rst),
 	.sample_clock (sample_clock),
 	.pcm (mix), // input to DAC
 	.out (pwmout) // connect to PWM pin
