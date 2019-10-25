@@ -11,8 +11,8 @@ reg sample_clock       = 0;
 reg [SAMPLECLOCK_DIV-1:0] sample_count = 0;
 always @(posedge clk) begin
 	if (rst) begin
-		sample_clock = 0;
-		sample_count = 0;
+		sample_clock <= 0;
+		sample_count <= 0;
 	end
 	else begin
 		sample_count <= sample_count + 1;

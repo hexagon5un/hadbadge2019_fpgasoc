@@ -19,7 +19,7 @@ localparam MIDPOINT   = 2**(BITDEPTH-1)-1;
 reg [TOPBIT:0] accumulator = 0 ;  
 always @(posedge sample_clock) begin 
 	if (rst) begin 
-		accumulator = 0 ;  
+		accumulator <= 0 ;  
 	end
 	else begin
 		accumulator <= accumulator + increment;

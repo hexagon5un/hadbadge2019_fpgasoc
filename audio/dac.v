@@ -15,13 +15,13 @@ reg [BITDEPTH:0] sample;
 // buffer at sample clock
 
 always @(posedge sample_clock) begin
-	sample = pcm;
+	sample <= pcm;
 end
 
 always @(posedge clk) begin
 	if (rst) begin
-		accumulator = 0;
-		sample = 0;
+		accumulator <= 0;
+		sample <= 0;
 	end
 	else begin
 		accumulator <= accumulator[BITDEPTH-1:0] + sample;

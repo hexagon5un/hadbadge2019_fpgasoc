@@ -11,7 +11,7 @@ reg [22:0] lfsr = 23'b01101110010010000101011;
 
 always @(posedge clk) begin
 	if (rst)
-		lfsr = 23'b01101110010010000101011;
+		lfsr <= 23'b01101110010010000101011;
 	else 
 		lfsr <= lfsr == 0 ? 23'b01101110010010000101011 : { lfsr[21:0], lfsr[22] ^ lfsr[17] };
 end

@@ -33,12 +33,12 @@ reg [8:0] release_exponential = 0;
 // state machine
 always @(posedge sample_clock) begin
 	if (rst) begin
-		state = WAIT;
-		volume = 0;
-		attack_counter = 0;
-		attack_exponential = 0;
-		release_counter = 0; 
-		release_exponential = 0;
+		state               <= WAIT;
+		volume              <= 0;
+		attack_counter      <= 0;
+		attack_exponential  <= 0;
+		release_counter     <= 0;
+		release_exponential <= 0;
 	end
 	else begin
 		case (state)
