@@ -26,7 +26,7 @@ sample_clock #( .SAMPLECLOCK_DIV(SAMPLECLOCK_DIV) ) mysampleclock (
 
 // import oscillator for sound source
 `define CALC_INCREMENT(hz) $rtoi(hz * 2**(BITDEPTH+BITFRACTION)/SAMPLEFREQ*2)
-reg [20:0] increment = `CALC_INCREMENT(262) ; 
+reg [15:0] increment = `CALC_INCREMENT(262) ; 
 
 wire [BITDEPTH-1:0] osc_out;
 oscillator #( .BITDEPTH(BITDEPTH), .BITFRACTION(BITFRACTION)) mysaw 

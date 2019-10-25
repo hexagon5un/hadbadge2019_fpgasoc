@@ -25,7 +25,7 @@ sample_clock #( .SAMPLECLOCK_DIV(SAMPLECLOCK_DIV) ) mysampleclock (
 
 reg gate = 0;
 reg [3:0] voice = 4'b0010;
-reg [20:0] pitch = 52345;
+reg [15:0] pitch = 22345;
 wire [BITDEPTH-1:0] out;
 /* Wires, registers, and module here */
 

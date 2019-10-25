@@ -7,7 +7,7 @@ module voice #(
 )(
 	input sample_clock,
 	input [3:0] voice_select,
-  	input [20:0] pitch_increment,
+  	input [15:0] pitch_increment,
   	input [7:0] envelope_attack,
   	input [7:0] envelope_decay,
 	input gate,
