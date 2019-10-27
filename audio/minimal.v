@@ -101,8 +101,8 @@ voice osc2 (
 voice osc3 (
 	.sample_clock(sample_clock),
 	.rst(rst),
-	.voice_select(voice),
-  	.note(67),
+	.voice_select(4'b0001),
+  	.note(rando >> 1),
   	.envelope_attack(8'hf0),
   	.envelope_decay(rando),
 	.gate(gate3),
