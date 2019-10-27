@@ -1,5 +1,5 @@
 PROJ=minimal
-DUT=voice
+DUT=scales_rom
 INCLUDES=oscillator.v dac.v button_number.v lfsr.v amplifier.v envelope.v
 CONSTR=had19_proto2.lpf
 TRELLIS=/usr/share/trellis

@@ -28,6 +28,7 @@ sample_clock #( .SAMPLECLOCK_DIV(SAMPLECLOCK_DIV) ) mysampleclock (
 	.clk(clk), .rst(rst), .sample_clock(sample_clock) 
 );
 
+
 reg [3:0] voice =  4'b0010 ;
 wire gate1;
 wire gate2;
@@ -81,7 +82,7 @@ voice osc1 (
 	.sample_clock(sample_clock),
 	.rst(rst),
 	.voice_select(voice),
-  	.pitch_increment(pitch),
+  	.note(60),
   	.envelope_attack(8'hf0),
   	.envelope_decay(rando >> 2),
 	.gate(gate1),
@@ -91,7 +92,7 @@ voice osc2 (
 	.sample_clock(sample_clock),
 	.rst(rst),
 	.voice_select(voice),
-  	.pitch_increment(26306),
+  	.note(64),
   	.envelope_attack(8'hf0),
   	.envelope_decay(rando),
 	.gate(gate2),
@@ -101,7 +102,7 @@ voice osc3 (
 	.sample_clock(sample_clock),
 	.rst(rst),
 	.voice_select(voice),
-  	.pitch_increment(22121),
+  	.note(67),
   	.envelope_attack(8'hf0),
   	.envelope_decay(rando),
 	.gate(gate3),
@@ -111,7 +112,7 @@ voice osc4 (
 	.sample_clock(sample_clock),
 	.rst(rst),
 	.voice_select(voice),
-  	.pitch_increment(`MIDI_NOTE(65)),
+  	.note(65),
   	.envelope_attack(8'hf0),
   	.envelope_decay(rando),
 	.gate(gate4),
@@ -130,7 +131,7 @@ voice osc5 (
 	.sample_clock(sample_clock),
 	.rst(rst),
 	.voice_select(voice),
-  	.pitch_increment(16572),
+  	.note(59),
   	.envelope_attack(8'hf0),
   	.envelope_decay(rando >> 4),
 	.gate(gate1),
@@ -140,7 +141,7 @@ voice osc6 (
 	.sample_clock(sample_clock),
 	.rst(rst),
 	.voice_select(voice),
-  	.pitch_increment(13935),
+  	.note(57),
   	.envelope_attack(8'hf0),
   	.envelope_decay(rando >> 4),
 	.gate(gate2),
@@ -150,7 +151,7 @@ voice osc7 (
 	.sample_clock(sample_clock),
 	.rst(rst),
 	.voice_select(voice),
-  	.pitch_increment(35115),
+  	.note(48),
   	.envelope_attack(8'hf0),
   	.envelope_decay(rando >> 4),
 	.gate(gate3),
@@ -160,7 +161,7 @@ voice osc8 (
 	.sample_clock(sample_clock),
 	.rst(rst),
 	.voice_select(voice),
-  	.pitch_increment(23436),
+  	.note(52),
   	.envelope_attack(8'hf0),
   	.envelope_decay(rando >> 4),
 	.gate(gate4),

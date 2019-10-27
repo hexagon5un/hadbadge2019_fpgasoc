@@ -27,7 +27,7 @@ sample_clock #( .SAMPLECLOCK_DIV(SAMPLECLOCK_DIV) ) mysampleclock (
 
 reg gate = 0;
 reg [3:0] voice = 4'b0010;
-reg [15:0] pitch = `MIDI_NOTE(60) ;
+reg [15:0] pitch ;
 wire [BITDEPTH-1:0] out;
 /* Wires, registers, and module here */
 
@@ -45,6 +45,13 @@ voice DUT (
 
 initial begin
 	// full cycle, attack, sustain, release
+	pitch=`MIDI_NOTE(20) ;
+	#20 pitch=`MIDI_NOTE(60) ;
+	#20 pitch=`MIDI_NOTE(61) ;
+	#20 pitch=`MIDI_NOTE(62) ;
+	#20 pitch=`MIDI_NOTE(63) ;
+	#20 pitch=`MIDI_NOTE(64) ;
+	#20 pitch=`MIDI_NOTE(85) ;
 	#10000000 gate = 1;
 	#50000000 pitch=`MIDI_NOTE(61) ;
 	#10000000 voice =4'b0001;
