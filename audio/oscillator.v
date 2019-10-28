@@ -3,7 +3,7 @@ module oscillator
 #(
 	parameter BITDEPTH   = 14,
 	parameter BITFRACTION   = 6,
-	parameter VOICE = 0
+	parameter [1:0] VOICE = 0
 ) (
 	input sample_clock,
 	input rst,

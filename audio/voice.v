@@ -5,7 +5,7 @@
 module voice #( 
 	parameter BITDEPTH   = 14,
 	parameter BITFRACTION   = 6,
-	parameter VOICE = 1
+	parameter [1:0] VOICE = 1
 )(
 	input sample_clock,
 	input rst,
