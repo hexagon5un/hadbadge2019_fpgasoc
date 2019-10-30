@@ -43,6 +43,8 @@ always @(posedge clk) begin
                 sample_clock <= 0;
                 sample_count <= 0;
 		slow_counter <= 0;
+		gate1 <= 0;
+		ready_n <= 0;
         end
         else begin
                 sample_count <= sample_count + 1;

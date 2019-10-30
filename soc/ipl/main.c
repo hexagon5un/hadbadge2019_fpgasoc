@@ -347,6 +347,8 @@ void main() {
 	user_memfn_set(malloc, realloc, free);
 	verilator_start_trace();
 	//When testing in Verilator, put code that pokes your hardware here.
+	SYNTHREG = 1;
+	printf("++++++++++++++++++++++++++ oi!\n");
 
 	//Initialize IRQ stack to be bigger than the bootrom stack
 	uint32_t *int_stack=malloc(IRQ_STACK_SIZE);
@@ -363,10 +365,8 @@ void main() {
 	printf("Filesystem inited.\n");
 
 	// Beep
-	SYNTHREG = 1;
 	//Initialize the LCD
 	lcd_init(simulated());
-	SYNTHREG = 0;
 
 
 	while(1) {
