@@ -51,6 +51,7 @@ extern uint32_t GFXTILEMAPA[];
 extern uint32_t GFXTILEMAPB[];
 extern uint32_t GFXSPRITES[];
 
+extern uint32_t SYNTHREG;
 uint8_t *lcdfb;
 
 
@@ -361,8 +362,12 @@ void main() {
 	fs_init();
 	printf("Filesystem inited.\n");
 
+	// Beep
+	SYNTHREG = 1;
 	//Initialize the LCD
 	lcd_init(simulated());
+	SYNTHREG = 0;
+
 
 	while(1) {
 		MISC_REG(MISC_LED_REG)=0xfffff;
