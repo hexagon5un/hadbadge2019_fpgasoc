@@ -1,6 +1,6 @@
-`include "oscillator.v"
-`include "ar.v"
-`include "scales_rom.v"
+/* `include "oscillator.v" */
+/* `include "ar.v" */
+/* `include "scales_rom.v" */
 
 module voice #( 
 	parameter BITDEPTH   = 14,
