@@ -518,7 +518,7 @@ module soc(
 `endif
 
 	assign mem_ready = ram_ready || uart_ready || irda_ready || misc_select ||
-			lcd_ready || linerenderer_ready || usb_ready || pic_ready || bus_error;
+			lcd_ready || linerenderer_ready || usb_ready || pic_ready || synth_ready || bus_error;
 
 	dsadc dsadc (
 		.clk(clk48m),
