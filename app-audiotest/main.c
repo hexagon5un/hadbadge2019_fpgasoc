@@ -24,6 +24,9 @@ uint8_t *fbmem;
 #define FB_WIDTH 512
 #define FB_HEIGHT 320
 
+extern volatile uint32_t SYNTH[];
+#define SYNTHREG(i) SYNTH[i/4]
+
 static inline void button_wait(){
 	//Wait until all buttons are released
 	while (MISC_REG(MISC_BTN_REG)) ;
@@ -37,7 +40,7 @@ void main(int argc, char **argv) {
 	
 	//Blank out fb while we're loading stuff by disabling all layers. This just shows the background color.
 	//  Blue, Green, Red
-	GFX_REG(GFX_BGNDCOL_REG)=0x101010; //a soft gray
+	GFX_REG(GFX_BGNDCOL_REG)=0xf010f0; //a soft gray
 	GFX_REG(GFX_LAYEREN_REG)=0; //disable all gfx layers
 	
 	//First, allocate some memory for the background framebuffer. We're gonna dump a fancy image into it. The image is
@@ -78,5 +81,10 @@ void main(int argc, char **argv) {
 	//8-bit.
 	GFX_REG(GFX_LAYEREN_REG)=GFX_LAYEREN_FB_8BIT|GFX_LAYEREN_FB|GFX_LAYEREN_TILEA;
 
+	button_wait();
+    SYNTHREG(0x0) = 0x1;	// just send gate high for now
+	button_wait();
+	fprintf(f,"HOWDY!\n");
+    SYNTHREG(0x0) = 0x0;	// just send gate high for now
 	button_wait();
 }
