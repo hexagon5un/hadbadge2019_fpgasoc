@@ -1,5 +1,6 @@
 /* Quick and dirty sigma-delta converter */
 `timescale 1ns/1ns
+
 module dac #(parameter BITDEPTH=14) (
 	input clk,
 	input rst,
@@ -9,22 +10,25 @@ module dac #(parameter BITDEPTH=14) (
 );
 
 
-/* reg [BITDEPTH-1:0] sample; */
 
-// buffer at sample clock
-
-/* always @(posedge sample_clock) begin */
-/* 	sample <= pcm; */
-/* end */
+// buffer when comes in
+reg [BITDEPTH-1:0] sample;
+always @(pcm) begin
+	if (!rst) begin
+		sample = pcm;
+	end
+	else begin
+		sample = 'h0;
+	end
+end
 
 reg [BITDEPTH:0] accumulator;
 always @(posedge clk) begin
 	if (rst) begin
-		accumulator <= BITDEPTH'h0;
-		/* sample <= 'h0; */
+		accumulator <= 'h0;
 	end
 	else begin
-		accumulator <= accumulator[BITDEPTH-1:0] + pcm;
+		accumulator <= accumulator[BITDEPTH-1:0] + sample;
 	end
 end
 

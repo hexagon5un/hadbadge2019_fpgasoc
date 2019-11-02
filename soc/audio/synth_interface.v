@@ -14,7 +14,7 @@ module synth_interface(
 	input [31:0] data_in,
 	input wen,
 	input ren,
-	output reg ready,
+	output ready,
 	// Audio/mixer i/o
 	output pwmout
 );
@@ -28,14 +28,15 @@ reg gate1;
 reg sample_clock       = 0;
 reg [SAMPLECLOCK_DIV-1:0] sample_count = 0;
 /* reg [31:0] mydata; */
+reg ready_n;
 
 always @(posedge clk) begin
         if (rst) begin
                 sample_clock <= 0;
                 sample_count <= 0;
-		slow_counter <= 0;
+		/* slow_counter <= 0; */
 		gate1 <= 0;
-		ready <= 0;
+		ready_n <= 0;
         end
         else begin
                 sample_count <= sample_count + 1;
@@ -43,17 +44,20 @@ always @(posedge clk) begin
 		if (wen) begin
 			gate1 <= data_in[0];
 			/* mydata <= data_in; */
+			ready_n <= 1; // handled data
 		end
-		ready <= wen;
         end
 end
+assign ready = ready_n && wen ; // speedup, drops line as soon as wen falls
 
-reg [18:0] slow_counter;
-always @(posedge sample_clock) begin
-	slow_counter <= slow_counter + 1;
-end
+/* reg [18:0] slow_counter; */
+/* always @(posedge sample_clock) begin */
+/* 	if (!rst) begin */
+/* 	slow_counter <= slow_counter + 1; */
+/* end */
+/* end */
 
-reg [BITDEPTH-1:0] osc1_out;
+wire [BITDEPTH-1:0] osc1_out;
 voice #(.VOICE(0)) osc1 (
 	.sample_clock(sample_clock),
 	.rst(rst),
