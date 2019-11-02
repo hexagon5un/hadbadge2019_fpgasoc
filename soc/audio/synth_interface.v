@@ -53,7 +53,7 @@ always @(posedge sample_clock) begin
 	slow_counter <= slow_counter + 1;
 end
 
-wire [BITDEPTH-1:0] osc1_out;
+reg [BITDEPTH-1:0] osc1_out;
 voice #(.VOICE(0)) osc1 (
 	.sample_clock(sample_clock),
 	.rst(rst),
@@ -67,7 +67,7 @@ voice #(.VOICE(0)) osc1 (
 dac #(.BITDEPTH(BITDEPTH)) mydac (
 	.clk (clk),
 	.rst(rst),
-	.sample_clock (sample_clock),
+	/* .sample_clock (sample_clock), */
 	.pcm (osc1_out), // input to DAC
 	.out (pwmout) // connect to PWM pin
 );
