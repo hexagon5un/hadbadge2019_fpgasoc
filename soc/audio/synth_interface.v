@@ -14,7 +14,7 @@ module synth_interface(
 	input [31:0] data_in,
 	input wen,
 	input ren,
-	output wire ready,
+	output reg ready,
 	// Audio/mixer i/o
 	output pwmout
 );
@@ -24,21 +24,10 @@ localparam BITFRACTION = 6;
 localparam SAMPLECLOCK_DIV = 8;
 localparam SAMPLEFREQ  = 8000000 / 2**SAMPLECLOCK_DIV;  // 31,250 Hz or 32 us
 
-reg ready_n;
-// buffer ready signal
-always @(posedge clk) begin
-	if (rst) begin
-		ready_n <= 0;
-	end else begin
-		ready_n <= (wen || ren);
-	end
-end
-assign ready = ready_n & (ren || wen);
-
 reg gate1;
 reg sample_clock       = 0;
 reg [SAMPLECLOCK_DIV-1:0] sample_count = 0;
-reg [31:0] mydata;
+/* reg [31:0] mydata; */
 
 always @(posedge clk) begin
         if (rst) begin
@@ -46,14 +35,16 @@ always @(posedge clk) begin
                 sample_count <= 0;
 		slow_counter <= 0;
 		gate1 <= 0;
-		ready_n <= 0;
+		ready <= 0;
         end
         else begin
                 sample_count <= sample_count + 1;
                 sample_clock <= sample_count[SAMPLECLOCK_DIV-1];
 		if (wen) begin
 			gate1 <= data_in[0];
+			/* mydata <= data_in; */
 		end
+		ready <= wen;
         end
 end
 
