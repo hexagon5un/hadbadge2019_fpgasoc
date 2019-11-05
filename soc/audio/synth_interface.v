@@ -32,7 +32,8 @@ reg sample_clock;
 reg slow_clock; // approx milliseconds
 reg [15:0] slow_counter;
 reg [16:0] counter;
-reg [31:0] mydata;
+reg [31:0] mydata; // register these in ASAP
+reg [7:0]  myaddr;
 reg ready_n;
 reg newdata;
 integer i;
@@ -52,6 +53,7 @@ reg [15:0] pcm;
 always @(posedge clk) begin
 	if (rst) begin
 		mydata        <= 0;
+		myaddr        <= 0;
 		ready_n       <= 0;
 		counter       <= 0;
 		sample_clock  <= 0;
@@ -78,6 +80,7 @@ always @(posedge clk) begin
 		// Bus handling, read data into mydata
 		if (wen) begin
 			mydata  <= data_in;
+			myaddr  <= addr;
 			ready_n <= 1; // signal handled data to memory bus -- but shortened below in combo
 			newdata <= 1; // signal new data to handle internally
 		end
@@ -87,23 +90,23 @@ always @(posedge clk) begin
 		// If have data, act on it. 
 		if (newdata) begin
 			newdata <= 0;
-		case (addr[3:0])	
+		case (myaddr[3:0])	
 			'h0: begin
-				if (addr[7:4] < 'h8) begin
+				if (myaddr[7:4] < 'h8) begin
 					/* $display("Synth voice play data register."); */
-					voice_increment[addr[7:4]] <= mydata[15:0];
+					voice_increment[myaddr[7:4]] <= mydata[15:0];
 					if (mydata[31:16]) begin
-						voice_gate[addr[7:4]] <= 1;
-						voice_off_time[addr[7:4]] <= slow_counter + mydata[31:16];
+						voice_gate[myaddr[7:4]] <= 1;
+						voice_off_time[myaddr[7:4]] <= slow_counter + mydata[31:16];
 					end 
 				end 
-				else if (addr[7:4] == 'hC ) begin 
+				else if (myaddr[7:4] == 'hC ) begin 
 					pcm[15:0] <= mydata[15:0];
 				end
-				else if (addr[7:4] == 'hD ) begin 
+				else if (myaddr[7:4] == 'hD ) begin 
 					/* $display("Drum play register."); */
 				end
-				else if (addr[7:4] == 'hF ) begin 
+				else if (myaddr[7:4] == 'hF ) begin 
 					master_volume <= mydata[15:0];
 				end
 				else begin
@@ -111,12 +114,12 @@ always @(posedge clk) begin
 				end
 			end
 			'h4: begin
-				if (addr[7:4] < 'h8) begin
+				if (myaddr[7:4] < 'h8) begin
 					/* $display("Synth voice A/R register."); */
-					voice_attack[addr[7:4]]  <= mydata[7:0];
-					voice_release[addr[7:4]] <= mydata[15:8];
+					voice_attack[myaddr[7:4]]  <= mydata[7:0];
+					voice_release[myaddr[7:4]] <= mydata[15:8];
 				end 
-				else if (addr[7:4] == 'hF ) begin 
+				else if (myaddr[7:4] == 'hF ) begin 
 					// All off
 					for (i=0; i<8; i=i+1) begin
 						voice_gate[i] <= 0;
