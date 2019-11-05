@@ -116,6 +116,12 @@ always @(posedge clk) begin
 					voice_attack[addr[7:4]]  <= mydata[7:0];
 					voice_release[addr[7:4]] <= mydata[15:8];
 				end 
+				else if (addr[7:4] == 'hF ) begin 
+					// All off
+					for (i=0; i<8; i=i+1) begin
+						voice_gate[i] <= 0;
+					end
+				end
 				else begin
 					/* $display("Not a valid config register."); */
 				end

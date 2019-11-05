@@ -506,6 +506,7 @@ but this should get you started.
 #define AUDIO_PCM           0xC0
 #define AUDIO_DRUMS         0xD0
 #define AUDIO_CONFIG_VOLUME 0xF0
+#define AUDIO_ALL_OFF       0xF4
 
 
 
