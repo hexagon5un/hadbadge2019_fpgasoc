@@ -133,7 +133,18 @@ always @(posedge clk) begin
 				/* $display("2 register not implemented yet."); */
 			end
 			'hC: begin
-				/* $display("3 register not implemented yet."); */
+				// direct gates register
+				if (myaddr[7:4] < 'h8) begin
+					voice_gate[myaddr[7:4]] <= mydata[0];
+					voice_off_time[myaddr[7:4]] <= slow_counter - 1; // forever 
+				end 
+				else if (myaddr[7:4] == 'hF ) begin 
+					// Bitmask					
+					for (i=0; i<8; i=i+1) begin
+						voice_gate[i] <= mydata[i];
+						voice_off_time[i] <= slow_counter - 1; // forever 
+					end 
+				end
 			end
 			default: begin 
 				/* $display("Fallen between the cracks."); */
