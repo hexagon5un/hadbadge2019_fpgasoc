@@ -420,7 +420,6 @@ void main() {
 	verilator_start_trace();
 	//When testing in Verilator, put code that pokes your hardware here.
 	
-
 	//Initialize IRQ stack to be bigger than the bootrom stack
 	uint32_t *int_stack=malloc(IRQ_STACK_SIZE);
 	irq_stack_ptr=int_stack+(IRQ_STACK_SIZE/sizeof(uint32_t));
@@ -431,20 +430,26 @@ void main() {
 	tusb_init();
 	printf("USB inited.\n");
 	
+	SYNTHREG(0xF0) = 0x00000300;
+	SYNTHREG(0x24) = 0x000008f0;	
+	SYNTHREG(0x20) = 0x00651800;	
 	//Initialize filesystem (fatfs, flash translation layer)
 	fs_init();
 	printf("Filesystem inited.\n");
 
+	/* SYNTHREG(0xF0) = 0x00000400; */
+	SYNTHREG(0x54) = 0x000010f0;	
+	SYNTHREG(0x50) = 0x00451E00;	
 	//Initialize the LCD
 	lcd_init(simulated());
 	
     // Basic startup chime.
-	SYNTHREG(0xF0) = 0x00000200;
-	SYNTHREG(0x40) = 0x00151800;	
-	SYNTHREG(0x50) = 0x00251E00;	
+	SYNTHREG(0xF0) = 0x00000300;
+	SYNTHREG(0x64) = 0x000010f0;	
 	SYNTHREG(0x60) = 0x00352400;	
-	SYNTHREG(0x70) = 0x00453000;	
     
+	SYNTHREG(0x34) = 0x000010f0;	
+	SYNTHREG(0x30) = 0x00453000;	
 
 	//See if there's an autoexec.elf we can run.
 	const char *autoexec;
