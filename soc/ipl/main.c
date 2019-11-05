@@ -430,20 +430,22 @@ void main() {
 	tusb_init();
 	printf("USB inited.\n");
 	
+    // Basic startup chime.
+	// Abusing other startup functions for note timing.
 	SYNTHREG(0xF0) = 0x00000300;
 	SYNTHREG(0x24) = 0x000008f0;	
 	SYNTHREG(0x20) = 0x00651800;	
+
 	//Initialize filesystem (fatfs, flash translation layer)
 	fs_init();
 	printf("Filesystem inited.\n");
 
-	/* SYNTHREG(0xF0) = 0x00000400; */
 	SYNTHREG(0x54) = 0x000010f0;	
 	SYNTHREG(0x50) = 0x00451E00;	
+
 	//Initialize the LCD
 	lcd_init(simulated());
 	
-    // Basic startup chime.
 	SYNTHREG(0xF0) = 0x00000300;
 	SYNTHREG(0x64) = 0x000010f0;	
 	SYNTHREG(0x60) = 0x00352400;	
