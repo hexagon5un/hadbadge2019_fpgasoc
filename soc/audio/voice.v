@@ -34,7 +34,7 @@ oscillator #( .BITDEPTH(BITDEPTH), .BITFRACTION(BITFRACTION), .VOICE(VOICE)) myo
 	.out(osc_out)
 );
 
-ar myar (
+ar #(.BITDEPTH(BITDEPTH))  myar (
 	.sample_clock(sample_clock),
 	.rst(rst),
 	.in(osc_out),

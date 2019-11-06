@@ -169,7 +169,7 @@ genvar synth_num;
 // Sawtooths
 generate
 	for (synth_num=0 ; synth_num < 2; synth_num=synth_num+1) begin 
-		voice #(.VOICE(0)) myvoice (
+		voice #(.VOICE(0), .BITDEPTH(BITDEPTH)) sawvoice (
 			.sample_clock(sample_clock),
 			.rst(rst),
 			.pitch_increment(voice_increment[synth_num]),
@@ -183,7 +183,7 @@ endgenerate
 // Pulses
 generate
 	for (synth_num=2 ; synth_num < 4; synth_num=synth_num+1) begin 
-		voice #(.VOICE(3)) osc (
+		voice #(.VOICE(3), .BITDEPTH(BITDEPTH)) pulsevoice (
 			.sample_clock(sample_clock),
 			.rst(rst),
 			.pitch_increment(voice_increment[synth_num]),
@@ -199,7 +199,7 @@ endgenerate
 // Triangles
 generate
 	for (synth_num=4 ; synth_num < 8; synth_num=synth_num+1) begin 
-		voice #(.VOICE(1)) myvoice (
+		voice #(.VOICE(1), .BITDEPTH(BITDEPTH)) trianglevoice (
 			.sample_clock(sample_clock),
 			.rst(rst),
 			.pitch_increment(voice_increment[synth_num]),
@@ -214,7 +214,7 @@ endgenerate
 // Mixers: two 4-way mixers for the two voice groups
 // Note the horrible off-by one!
 wire [BITDEPTH-1:0] mix1;
-mixer4 mixer (
+mixer4 #(.BITDEPTH(BITDEPTH)) mixer (
        .in1(voice_out[0]),
        .in2(voice_out[1]),
        .in3(voice_out[2]),
@@ -223,7 +223,7 @@ mixer4 mixer (
 );
 
 wire [BITDEPTH-1:0] mix2;
-mixer4 othermixer (
+mixer4 #(.BITDEPTH(BITDEPTH))  othermixer (
        .in1(voice_out[4]),
        .in2(voice_out[5]),
        .in3(voice_out[6]),

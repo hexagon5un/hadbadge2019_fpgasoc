@@ -23,7 +23,7 @@ envelope myenv (
 	.volume(volume) // returns
 );
 
-amplifier myamp (
+amplifier #(.BITDEPTH(BITDEPTH)) myamp (
 	.in(in),
 	.volume(volume),
 	.out(out)
