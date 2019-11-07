@@ -103,7 +103,7 @@ module synth_wb (
 		.wr_addr(wtw_addr),
 		.wr_data(wtw_data),
 		.wr_ena(wtw_ena),
-		.rd_addr(wtr_addr_0),
+		.rd_addr(wtr_addr_0[11:2]),
 		.rd_data(wtr_data32_1),
 		.rd_ena(1'b1),
 		.clk(clk)
