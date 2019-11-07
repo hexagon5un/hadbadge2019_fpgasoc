@@ -5,15 +5,43 @@
 #include "mach_defines.h"
 #include "gfx_load.h"
 #include "cache.h"
+#include "midi_note_increments.h"
 
-// Copy these files into your project to use them
-#include "audiolib.h"
+#define SYNTH_VOICE_CTRL_ENABLE		(1 << 0)
+#define SYNTH_VOICE_CTRL_PHASE_ZERO	(1 << 1)
+#define SYNTH_VOICE_CTRL_SAWTOOTH	(0 << 2)
+#define SYNTH_VOICE_CTRL_TRIANGLE	(1 << 2)
+#define SYNTH_VOICE_CTRL_PULSE		(2 << 2)
+#define SYNTH_VOICE_CTRL_SUBHARMONIC	(3 << 2)
 
-//hardware addresses imported manually
-extern volatile uint32_t MISC[];
-#define MISC_REG(i) MISC[(i)/4]
+#define SYNTH_VOICE_VOLUME(l,r)		(((l)<<8) | (r))
 
-static inline void pause(uint32_t duration){
+struct synth {
+	/* Per-Voice registers */
+	struct {
+		uint32_t ctrl;
+		uint32_t _rsvd;
+		uint32_t phase_inc;
+		uint32_t phase_cmp;
+		uint32_t volume;
+		uint32_t duration;
+		uint32_t attack;
+		uint32_t decay;
+	} voice[16];
+
+	/* Global register */
+	uint32_t samplerate_div;
+	uint32_t volume;
+	uint32_t voice_force;
+	uint32_t voice_start;
+} __attribute__((packed,aligned(4)));
+
+static volatile struct synth * const synth_regs = (void*)(AUDIO_CORE_BASE);
+
+
+
+static inline void
+pause(uint32_t duration){
 	for (volatile uint32_t i=0; i<duration; i++){;}
 }
 #define SHORT    0x00040000
@@ -21,72 +49,40 @@ static inline void pause(uint32_t duration){
 #define LONG     0x00100000
 
 
-void main(int argc, char **argv) {
-	// So you can play the synthesizer the easy way or the hard way...
-	// For the hard way, see the documentation in soc/audio/README.html or 
-	//  in soc/ipl/gloss/mach_defines.h
-	// But the gist is play registers for the 8 voices are on even 16s
-	// AUDIO_CORE_BASE + 0x30 is the register for voice 3
-	// Write the high 16 bits with the duration and the low 16 bits with the pitch.
-	// And off it goes.  
-	// You just need to feed the synth a string of notes/durations on time.
-	// This could be done in any kind of repeating regular loop that fits.
+int scale_table_major[] = {0, 2, 4, 5, 7, 9, 11};
+int scale_major(int i){
+	return (i/7)*12 + scale_table_major[i%7];
+}
 
-	/* Voices are (from mach_defines.h) */ 
-	/* #define AUDIO_VOICE_SAW1   0x00 */
-	/* #define AUDIO_VOICE_SAW2   0x10 */
-	/* #define AUDIO_VOICE_PULSE  0x20 */
-	/* #define AUDIO_VOICE_SQUARE 0x30 */
-	/* #define AUDIO_VOICE_TRI1   0x40 */
-	/* #define AUDIO_VOICE_TRI2   0x50 */
-	/* #define AUDIO_VOICE_TRI3   0x60 */
-	/* #define AUDIO_VOICE_TRI4   0x70 */
-
-	// set volume
-	SYNTHREG(AUDIO_CONFIG_VOLUME) = 0x0200; // a good volume for four voices
-
-	/* The 'hard' way: voice 4, duration in 1.35 ms, pitch in crazy units */
-	/* SYNTHREG(0x40) = 0x001516DC; */	
-	/* ... or the easy way */
-	SYNTHREG(AUDIO_VOICE_TRI1) = AUDIO_PITCH(5852) + AUDIO_DURATION(0x0015);
-	SYNTHREG(AUDIO_VOICE_TRI2) = AUDIO_PITCH(7374) + AUDIO_DURATION(0x0025);
-	SYNTHREG(AUDIO_VOICE_TRI3) = AUDIO_PITCH(8769) + AUDIO_DURATION(0x0035);
-	SYNTHREG(AUDIO_VOICE_TRI4) = AUDIO_PITCH(11705) + AUDIO_DURATION(0x0045);
-	pause(MIDDLE);
-	/* or the musical way */
-
-	// set a slow attack/release on SAW1
-	// SYNTHREG(AUDIO_VOICE_SAW1 + AUDIO_CONFIG_REG_OFFSET) = 0x00000311;	
-	set_dynamics(0, 0x03, 0x11);
-	// instrument 0 (SAW1) play C3, note 48, for 1000 ms
-	play_midi_note(0, 48, 1000);
-	pause(LONG);
-	play_midi_note(4, 52, 200);	
-	pause(SHORT);
-	play_midi_note(5, 55, 200);	
-	pause(SHORT);
-	play_midi_note(6, 60, 200);	
-	pause(SHORT);
-	play_midi_note(7, 64, 200);	
-	pause(SHORT);
-	play_midi_note(4, 52, 200);	
-	pause(SHORT);
-	play_midi_note(5, 55, 200);	
-	pause(SHORT);
-	set_dynamics(3, 0x03, 0x01);
-	play_midi_note(3, 48, 1000);
-	pause(LONG);
-	pause(LONG);
-	pause(LONG);
+void main(int argc, char **argv)
+{
+	synth_regs->samplerate_div = (1000 - 2);	/* 48M / 1000 = 48 kHz */
+	synth_regs->volume = 255;			/* Max volume */
 
 
-	// random noise in PCM channel as test
-	// super loud!
-	set_volume(0x0010);
-	for (uint32_t i=0; i<5000; i++){
-		SYNTHREG(AUDIO_PCM) = MISC_REG(MISC_RNG_REG);
-		// or pcm_audio(MISC_REG(MISC_RNG_REG));
-		for (volatile uint32_t j=1; j<100; j++){;}  // measures at 11.65 kHz on my scope
+	for (int j=0; j<4; j++) {
+		synth_regs->voice[j].ctrl     = SYNTH_VOICE_CTRL_ENABLE | (j << 2);
+		synth_regs->voice[j].volume   = SYNTH_VOICE_VOLUME(192,192);
+		synth_regs->voice[j].duration = 46; /* ~ 250 ms */
+		synth_regs->voice[j].attack   = 0x1020;
+		synth_regs->voice[j].decay    = 0x1040;
+		synth_regs->voice[j].phase_cmp=  (1<<9);
+		for (int i=0; i<8; i++) {
+			synth_regs->voice[j].phase_inc = midi_table[20 + scale_major(i)];
+			synth_regs->voice_start = (1 << j);
+			pause(MIDDLE);
+		}
 	}
+	// quick chord
+	synth_regs->voice[0].phase_inc = midi_table[20];
+	synth_regs->voice[1].phase_inc = midi_table[24];
+	synth_regs->voice[2].phase_inc = midi_table[27];
+	synth_regs->voice[3].phase_inc = midi_table[32];
+	
+	synth_regs->voice_start = 0x0F;
+	pause(LONG);
+
+	synth_regs->volume = 0;	
+
 }
 
