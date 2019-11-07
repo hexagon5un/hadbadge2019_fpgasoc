@@ -358,7 +358,7 @@ module soc(
 	wire [31:0] psram_rdata;
 	wire psram_ready;
 	reg psram_select;
-
+	wire [31:0] synth_rdata;
 	reg synth_select;
 	wire synth_ready;
 
@@ -492,7 +492,7 @@ module soc(
 			mem_rdata = pic_rdata;
 		end else if (mem_addr[31:28]=='h8) begin
 			synth_select = mem_valid;
-			mem_rdata = 0;
+			mem_rdata = synth_rdata;
 		end else if (mem_addr[31:28]=='h9) begin
 			psram_select = mem_valid;
 			mem_rdata = psram_rdata;
@@ -670,16 +670,35 @@ module soc(
 		.ren(pic_select && mem_wstrb==4'b0000),
 		.ready(pic_ready)
 	);
-	synth_interface synth (
+
+
+	wire [15:0] audio_l;
+	wire [15:0] audio_r;
+
+	synth_wb synth_I (
+		.audio_out_l(audio_l),
+		.audio_out_r(audio_r),
+		.bus_addr(mem_addr[17:2]),
+		.bus_wdata(mem_wdata),
+		.bus_rdata(synth_rdata),
+		.bus_cyc(synth_select),
+		.bus_ack(synth_ready),
+		.bus_we(mem_wstrb != 0),
 		.clk(clk48m),
-		.rst(rst),
-		.addr(mem_addr),
-		.data_in(mem_wdata),
-		.wen(synth_select && mem_wstrb==4'b1111),
-		.ren(synth_select && mem_wstrb==4'b0000),
-		.ready(synth_ready),
-		.pwmout(pwmout)
+		.rst(rst)
 	);
+
+	pdm #(
+		.WIDTH(16),
+		.DITHER("YES")
+	) audio_pdm_I (
+		.in(audio_l),
+		.pdm(pwmout),
+		.oe(1'b1),
+		.clk(clk48m),
+		.rst(rst)
+	);
+
 
 	wire qpi_do_read;
 	wire qpi_do_write;
