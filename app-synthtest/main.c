@@ -13,6 +13,10 @@
 #define SYNTH_VOICE_CTRL_TRIANGLE	(1 << 2)
 #define SYNTH_VOICE_CTRL_PULSE		(2 << 2)
 #define SYNTH_VOICE_CTRL_SUBHARMONIC	(3 << 2)
+#define SYNTH_VOICE_CTRL_WT4K_FWD	(4 << 2)
+#define SYNTH_VOICE_CTRL_WT4K_FWD_REV	(5 << 2)
+#define SYNTH_VOICE_CTRL_WT2K_FWD	(6 << 2)
+#define SYNTH_VOICE_CTRL_WT2K_FWD_REV	(7 << 2)
 
 #define SYNTH_VOICE_VOLUME(l,r)		(((l)<<8) | (r))
 
@@ -38,7 +42,7 @@ struct synth {
 
 static volatile struct synth * const synth_regs = (void*)(AUDIO_CORE_BASE);
 
-
+static volatile uint32_t * const synth_wt = (void*)(AUDIO_CORE_BASE | 0x00030000);
 
 
 
