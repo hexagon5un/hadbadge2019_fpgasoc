@@ -4,11 +4,18 @@
 ## programs on the Supercon badge.  
 
 import mido
+import sys
+
+
+###  (@_@) Need to take running status and maybe note volume zero into account? 
+###        Also a way to remove tracks that are percussion that we can't do?
+
 
 ## Tweak these to your liking
-FILE       = 'Mario-Sheet-Music-Overworld-Main-Theme.mid'
+# FILE       = 'Mario-Sheet-Music-Overworld-Main-Theme.mid'
 # FILE       = 'Tetris-Theme_A_by_Gori_Fater.mid'
-HEADERNAME = "mario"
+FILE       = sys.argv[1]
+HEADERNAME = sys.argv[2]
 # HEADERNAME = "tetris"
 OUTFILE    = FILE[:-4] + ".h"
 BPM        = 120
@@ -31,6 +38,19 @@ def is_note(msg):
         answer = False
     return answer
 
+def is_note_off(msg):
+    if msg.type == "note_off" or (msg.type == "note_on" and msg.velocity == 0):
+        answer = True
+    else:
+        answer = False
+    return answer
+
+def is_note_on(msg):
+    if msg.type == "note_on" and msg.velocity > 0:
+        answer = True
+    else:
+        answer = False
+    return answer
 ## Next, get a feel for how many instruments there are in the track, and how
 ## voices per instrument they play.  You will need this to set up our synth.
 
@@ -39,9 +59,9 @@ def num_notes(track):
     voice_count = 0
     max_voices = 0
     for msg in track: 
-        if (msg.type == "note_on"):
+        if is_note_on(msg):
             voice_count = voice_count + 1
-        if (msg.type == "note_off"): 
+        if is_note_off(msg): 
             voice_count = voice_count - 1
         if voice_count > max_voices:
             max_voices = voice_count
@@ -55,7 +75,6 @@ for i, track in enumerate(m.tracks):
 
 if sum(voices) > MAXVOICES:
     print("Too many simultaneous notes.  You have some hard choices to make, friend.")
-
 ## At this point, the file will create data for you of the format:
 ##   timedelta, note0, note1, note2, ...
 ## for all note events in the midi file
@@ -86,7 +105,7 @@ for num_voices,track in zip(voices, has_notes):
         track_event['time'] = time
         if DEBUG and step < 20:
             print(event)
-        if event.type == 'note_on':
+        if is_note_on(event):
             track_event['voice'] = voice_offset + active_voice
             track_event['on'] = 1
             track_event['note'] = event.note
@@ -94,7 +113,7 @@ for num_voices,track in zip(voices, has_notes):
             voice_notes[active_voice] = event.note
             ## advance voice for next one
             active_voice = (active_voice + 1) % num_voices 
-        if event.type == 'note_off':
+        if is_note_off(event):
             try:
                 which_voice = voice_notes.index(event.note)
                 track_event['voice'] = voice_offset + which_voice
