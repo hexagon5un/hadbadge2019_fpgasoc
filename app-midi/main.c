@@ -8,6 +8,8 @@
 #include "midi_note_increments.h"
 #include "Tetris-Theme_A_by_Gori_Fater.h"
 #include "Mario-Sheet-Music-Overworld-Main-Theme.h"
+#include "Mario-Sheet-Music-Starman-Theme.h"
+#include "Vampire_Killer_2_nodrums.h"
 
 #define SYNTH_VOICE_CTRL_ENABLE		(1 << 0)
 #define SYNTH_VOICE_CTRL_PHASE_ZERO	(1 << 1)
@@ -65,24 +67,41 @@ void main(int argc, char **argv)
 
 	synth_regs->samplerate_div = (1000 - 2);	/* 48M / 1000 = 48 kHz */
 	synth_regs->volume = 255;			/* Max volume */
-
+  
+	// Sensible defaults?
 	for (int j=0; j<8; j++) {
-		/* synth_regs->voice[j].ctrl     = SYNTH_VOICE_CTRL_ENABLE | ((j%3) << 2); */
-		synth_regs->voice[j].ctrl     = SYNTH_VOICE_CTRL_ENABLE | SYNTH_VOICE_CTRL_SAWTOOTH	;
 		synth_regs->voice[j].volume   = SYNTH_VOICE_VOLUME(192,192);
 		synth_regs->voice[j].duration = 46; /* ~ 250 ms */
 		synth_regs->voice[j].attack   = 0x0020;
 		synth_regs->voice[j].decay    = 0x0040;
-		/* synth_regs->voice[j].phase_cmp=  (1<<9); */
+		synth_regs->voice[j].phase_cmp=  (1<<8);
 		synth_regs->voice[j].phase_inc = midi_table[20 + scale_major(j)];
 	}
+	synth_regs->voice[0].ctrl     = SYNTH_VOICE_CTRL_ENABLE | SYNTH_VOICE_CTRL_PULSE	;
+	synth_regs->voice[1].ctrl     = SYNTH_VOICE_CTRL_ENABLE | SYNTH_VOICE_CTRL_PULSE	;
+	synth_regs->voice[0].attack   = 0x0010;
+	synth_regs->voice[1].attack   = 0x0010;
+	synth_regs->voice[0].decay    = 0x0010;
+	synth_regs->voice[1].decay    = 0x0010;
 
-	for (int event=0; event < 469; ++event){
+	synth_regs->voice[2].ctrl     = SYNTH_VOICE_CTRL_ENABLE | SYNTH_VOICE_CTRL_TRIANGLE	;
+	synth_regs->voice[2].attack   = 0x0010;
+	synth_regs->voice[2].decay    = 0x0030;
+
+	synth_regs->voice[3].ctrl     = SYNTH_VOICE_CTRL_ENABLE | SYNTH_VOICE_CTRL_SAWTOOTH	;
+	synth_regs->voice[4].ctrl     = SYNTH_VOICE_CTRL_ENABLE | SYNTH_VOICE_CTRL_SAWTOOTH	;
+	synth_regs->voice[3].attack   = 0x0040;
+	synth_regs->voice[4].attack   = 0x0040;
+	synth_regs->voice[3].decay    = 0x0040;
+	synth_regs->voice[4].decay    = 0x0040;
+
+
+	for (int event=0; event < 1168; ++event){
 	/* for (int event=0; event < 3552; ++event){ */
-		delta = tetris[event][0];
-		voice = tetris[event][1];
-		note  = tetris[event][2];
-		pause(480*delta);
+		delta = castlevania[event][0];
+		voice = castlevania[event][1];
+		note  = castlevania[event][2];
+		pause(1200*delta);
 
 		if (note < 128){ // range valid midi notes
 			synth_regs->voice[voice].phase_inc = midi_table[note-24];
