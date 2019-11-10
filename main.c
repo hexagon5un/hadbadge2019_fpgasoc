@@ -7,57 +7,12 @@
 #include "sdk.h"
 #include "gfx_load.h"
 #include "cache.h"
+
+#include "libmidi.h"
+#include "libsynth.h"
 #include "Tetris-hand_edits.h"
-#include "midi_note_increments.h"
-
-uint32_t time() {
-	uint32_t cycles;
-	asm volatile ("rdcycle %0" : "=r"(cycles));
-	return cycles;
-}
-
-#define SECONDS 48000000
-#define MILLIS  48000
 
 // the name of the data from the include file
-#define SONGDATA   tetris
-#define SONGLENGTH sizeof(SONGDATA)/sizeof(uint16_t)/3
-
-#define SYNTH_VOICE_CTRL_ENABLE		(1 << 0)
-#define SYNTH_VOICE_CTRL_PHASE_ZERO	(1 << 1)
-#define SYNTH_VOICE_CTRL_SAWTOOTH	(0 << 2)
-#define SYNTH_VOICE_CTRL_TRIANGLE	(1 << 2)
-#define SYNTH_VOICE_CTRL_PULSE		(2 << 2)
-#define SYNTH_VOICE_CTRL_SUBHARMONIC	(3 << 2)
-
-#define SYNTH_VOICE_VOLUME(l,r)		(((l)<<8) | (r))
-
-struct synth {
-	/* Per-Voice registers */
-	struct {
-		uint32_t ctrl;
-		uint32_t _rsvd;
-		uint32_t phase_inc;
-		uint32_t phase_cmp;
-		uint32_t volume;
-		uint32_t duration;
-		uint32_t attack;
-		uint32_t decay;
-	} voice[16];
-
-	/* Global register */
-	uint32_t samplerate_div;
-	uint32_t volume;
-	uint32_t voice_force;
-	uint32_t voice_start;
-} __attribute__((packed,aligned(4)));
-
-static volatile struct synth * const synth_regs = (void*)(AUDIO_CORE_BASE);
-int scale_major(int i){
-	int scale_table_major[] = {0, 2, 4, 5, 7, 9, 11};
-	return (i/7)*12 + scale_table_major[i%7];
-}
-
 //The bgnd.png image got linked into the binary of this app, and these two chars are the first
 //and one past the last byte of it.
 extern char _binary_badgetris_bgnd_png_start;
@@ -141,69 +96,12 @@ uint16_t state;
 
 int8_t sstr[3];
 
-void audio_init(){
-	synth_regs->samplerate_div = (1000 - 2);	/* 48M / 1000 = 48 kHz */
-	synth_regs->volume = 255;			/* Max volume */
-
-	// Sensible defaults?
-	for (int j=0; j<8; j++) {
-		synth_regs->voice[j].ctrl     = SYNTH_VOICE_CTRL_ENABLE | SYNTH_VOICE_CTRL_TRIANGLE	;
-		synth_regs->voice[j].volume   = SYNTH_VOICE_VOLUME(192,192);
-		synth_regs->voice[j].duration = 46; /* ~ 250 ms */
-		synth_regs->voice[j].attack   = 0x0020;
-		synth_regs->voice[j].decay    = 0x0080;
-		synth_regs->voice[j].phase_cmp=  (1<<8);
-		synth_regs->voice[j].phase_inc = midi_table[20 + scale_major(j)];
-	}
-	// Config the bass voice, slow attack down.  Cello?
-	synth_regs->voice[3].ctrl     = SYNTH_VOICE_CTRL_ENABLE | SYNTH_VOICE_CTRL_SAWTOOTH	;
-	synth_regs->voice[4].ctrl     = SYNTH_VOICE_CTRL_ENABLE | SYNTH_VOICE_CTRL_SAWTOOTH	;
-	synth_regs->voice[3].attack   = 0x0040;
-	synth_regs->voice[4].attack   = 0x0040;
-	synth_regs->voice[3].volume   = SYNTH_VOICE_VOLUME(128,128);
-	synth_regs->voice[4].volume   = SYNTH_VOICE_VOLUME(128,128);
-}
 void toggleled(){
 	static uint8_t led_state = 1;
 		MISC_REG(MISC_LED_REG)=(led_state<<4);
 		led_state = !led_state;
 }
 
-void handle_song(){
-	static uint16_t song_step = 0;
-	static uint8_t  gates     = 0;
-	static uint32_t last_time = 0;
-	static uint32_t time_interval  = 0;
-	uint32_t delta, voice, note;
-
-	if (time() - last_time >= time_interval ){
-		song_step++;
-		last_time = time();
-		
-		// Reset
-		if (song_step > (SONGLENGTH-1)){
-			song_step = 0;
-		}
-
-	MISC_REG(MISC_LED_REG)=((song_step));
-		delta = SONGDATA[song_step][0];
-		voice = SONGDATA[song_step][1];
-		note  = SONGDATA[song_step][2];
-		
-		time_interval = 50000*delta; // 48000000 / 120 BPM / 480 clocks 
- 
-
-		// Play note or turn note off, accordingly
-		if (note < 128){ // range valid midi notes
-			synth_regs->voice[voice].phase_inc = midi_table[note-24];
-			gates |= (1 << voice);
-		}
-		else {
-			gates &= ~(1 << voice);
-		}
-		synth_regs->voice_force = gates;
-	}
-}
 
 void tetrapuzz(void)
 {
@@ -214,9 +112,8 @@ void tetrapuzz(void)
 
 	while(1)
 	{
-		// 
-
-		handle_song();
+		// Need tetris tunes.
+        midi_play_song(tetris, SONGLENGTH(tetris), BPM(124)); 
 
 		if (counter60hz() > buttondebounce) {
 			//Service button inputs as necessary
@@ -1028,7 +925,6 @@ void BOX_update_screen(void)
 {
 	//This function call is not needed when a screen buffer isn't used
 	//BOX_rewrite_display(default_fg_color, default_bg_color);
-	handle_song();
 }
 
 void BOX_spawn(void)
@@ -1256,8 +1152,17 @@ void main(int argc, char **argv) {
 		MISC_REG(MISC_LED_REG)=(1<<i);
 		__INEFFICIENT_delay(100);
 	}
-	audio_init();
-
+	
+	// Configure the audio synthesizer
+	synth_init(5);
+	// Default triangle-wave voices are fine for the high pitches
+	// But a sawtooth, cello-esque thing is nice in the bass
+	synth_regs->voice[3].ctrl     = SYNTH_VOICE_CTRL_ENABLE | SYNTH_VOICE_CTRL_SAWTOOTH	;
+	synth_regs->voice[4].ctrl     = SYNTH_VOICE_CTRL_ENABLE | SYNTH_VOICE_CTRL_SAWTOOTH	;
+	synth_regs->voice[3].attack   = 0x0040;
+	synth_regs->voice[4].attack   = 0x0040;
+	synth_regs->voice[3].volume   = SYNTH_VOICE_VOLUME(128,128);
+	synth_regs->voice[4].volume   = SYNTH_VOICE_VOLUME(128,128);
 
 	//Set up the framebuffer address.
 	GFX_REG(GFX_FBADDR_REG)=((uint32_t)fbmem)&0xFFFFFF;
@@ -1325,5 +1230,6 @@ void main(int argc, char **argv) {
 	 */
 
 	tetrapuzz();
+	synth_all_off();
 	return;
 }
