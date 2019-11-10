@@ -1,11 +1,10 @@
 #This is an example Makefile to build the 'Hello world' example.
-
 #The name of the app. The resulting file will be called APPNAME.elf.
 APPNAME = badgetris
 
 #Option 1 of indicating what files to compile: tell the SDK what directories contain
 #source files. The SDK will then compile everything in these directories.
-SRCDIRS = . subdir
+SRCDIRS = . synth
 
 #Option 2: Tell the SDK what objects there are. The objects are effectively all
 #compilable files with their extension changed to .o. Note: This means it will not
@@ -14,7 +13,7 @@ SRCDIRS = . subdir
 
 #These directories will be passed (with the -I flag) to the compiler. This makes it so you
 #can directly #include "file.h" from these directories.
-INCLUDEDIRS =
+INCLUDEDIRS = synth
 
 #You can include binaries directly in your app by adding it to BINFILE. See main.c on how
 #to reference to its data.
@@ -30,3 +29,4 @@ include $(APPSSDK_DIR)/sdk.mk
 
 flappy-tileset.o: flappy-tileset.png
 	$(OBJCOPY) -I binary -O elf32-littleriscv -B riscv $< $@
+
