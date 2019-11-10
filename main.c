@@ -1150,7 +1150,7 @@ void main(int argc, char **argv) {
 
 	for (uint8_t i=0; i<16;i++) {
 		MISC_REG(MISC_LED_REG)=(1<<i);
-		__INEFFICIENT_delay(100);
+		__INEFFICIENT_delay(20);
 	}
 	
 	// Configure the audio synthesizer
