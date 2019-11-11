@@ -1,7 +1,5 @@
 #pragma once
 
-#include <stdint.h>
-
 uint32_t midi_table [128] = {
 615, /* 21 - A0 */
 652, /* 22 - A#0 */

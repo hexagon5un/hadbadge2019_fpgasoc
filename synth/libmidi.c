@@ -47,12 +47,12 @@ void midi_play_song(uint16_t songArray[][3], uint16_t songLength, uint32_t clock
 
 		// Play note or turn note off, accordingly
 		if (note < 128){ // range valid midi notes
-			synth_regs->voice[voice].phase_inc = midi_table[note-24];
+			synth_now->voice[voice].phase_inc = midi_table[note-24];
 			gates |= (1 << voice);
 		}
 		else {
 			gates &= ~(1 << voice);
 		}
-		synth_regs->voice_force = gates;
+		synth_now->voice_force = gates;
 	}
 }

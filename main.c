@@ -113,7 +113,7 @@ void tetrapuzz(void)
 	while(1)
 	{
 		// Need tetris tunes.
-        midi_play_song(tetris, SONGLENGTH(tetris), BPM(124)); 
+        midi_play_song(tetris, SONGLENGTH(tetris), BPM(130)); 
 
 		if (counter60hz() > buttondebounce) {
 			//Service button inputs as necessary
@@ -165,6 +165,8 @@ void tetrapuzz_loop(void)
 
 	if (BOX_end_game())
 	{
+		// Stop audio
+		synth_all_off();
 		//Print game ending information
 		BOX_show_gameover();
 		//Loop until a button is pushed
@@ -1155,14 +1157,20 @@ void main(int argc, char **argv) {
 	
 	// Configure the audio synthesizer
 	synth_init(5);
-	// Default triangle-wave voices are fine for the high pitches
+	// Default triangle-wave voices are fine for the high pitches, maybe with a snappier envelope
+	for (uint8_t i=0; i<3; i++){
+		synth_now->voice[i].attack = 0x0020;
+		synth_now->voice[i].decay  = 0x0040;
+		synth_now->voice[i].volume = SYNTH_VOICE_VOLUME(192,192);
+	}
+	
 	// But a sawtooth, cello-esque thing is nice in the bass
-	synth_regs->voice[3].ctrl     = SYNTH_VOICE_CTRL_ENABLE | SYNTH_VOICE_CTRL_SAWTOOTH	;
-	synth_regs->voice[4].ctrl     = SYNTH_VOICE_CTRL_ENABLE | SYNTH_VOICE_CTRL_SAWTOOTH	;
-	synth_regs->voice[3].attack   = 0x0040;
-	synth_regs->voice[4].attack   = 0x0040;
-	synth_regs->voice[3].volume   = SYNTH_VOICE_VOLUME(128,128);
-	synth_regs->voice[4].volume   = SYNTH_VOICE_VOLUME(128,128);
+	for (uint8_t i=3; i<5; i++){
+		synth_now->voice[i].ctrl   = SYNTH_VOICE_CTRL_ENABLE | SYNTH_VOICE_CTRL_SAWTOOTH	;
+		synth_now->voice[i].attack = 0x0040;
+		synth_now->voice[i].decay  = 0x0040;
+		synth_now->voice[i].volume = SYNTH_VOICE_VOLUME(64,64);
+	}
 
 	//Set up the framebuffer address.
 	GFX_REG(GFX_FBADDR_REG)=((uint32_t)fbmem)&0xFFFFFF;
