@@ -11,6 +11,8 @@ SRCDIRS = .
 #if people have not got it set, we assume the default relative directory to it.
 APPSSDK_DIR ?= ../apps-sdk
 
+BINFILES=test.raw
+
 #Include the SDK makefile. It'll take care of the rest.
 include $(APPSSDK_DIR)/sdk.mk
 
