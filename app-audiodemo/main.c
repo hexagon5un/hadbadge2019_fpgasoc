@@ -23,19 +23,20 @@ int scale_major(int i){
 // SCALES, DEFAULTS, CHORDS, PWM, 
 #define DEFAULTS 1
 // #define PWM 1
-#define SCALES 1
-#define CHORDS 1
+/* #define SCALES 1 */
+/* #define CHORDS 1 */
 
 void main(int argc, char **argv)
 {
 	synth_now->samplerate_div = (1000 - 2);	/* 48M / 1000 = 48 kHz */
-	synth_now->volume = 192;			/* Max volume */
+	synth_now->volume = 255;			/* Max volume */
+	audio_regs->csr = (1 << 1);
 
 #ifdef DEFAULTS
 	for (int j=0; j<8; j++) {
 		synth_now->voice[j].ctrl     = SYNTH_VOICE_CTRL_ENABLE | ((j%3) << 2);
 		synth_now->voice[j].volume   = SYNTH_VOICE_VOLUME(192,192);
-		synth_now->voice[j].duration = 46; /* ~ 250 ms */
+		synth_now->voice[j].duration = 46; 
 		synth_now->voice[j].attack   = 0x1020;
 		synth_now->voice[j].decay    = 0x1040;
 		synth_now->voice[j].phase_cmp=  (1<<9);
@@ -53,6 +54,16 @@ void main(int argc, char **argv)
 		}
 	}
 #endif
+
+	synth_now->voice[0].volume   = SYNTH_VOICE_VOLUME(192,192);
+	synth_now->voice[0].phase_inc = midi_table[36];
+	synth_now->voice[0].duration = 146;
+	synth_now->voice_start = (1 << 0); 
+	pause(LONG); 
+	pause(LONG); 
+	pause(LONG); 
+	pause(LONG); 
+	pause(LONG); 
 
 #ifdef CHORDS
 	// quick chord
@@ -82,6 +93,6 @@ void main(int argc, char **argv)
 	pause(LONG);
 #endif
 
-	synth_now->volume = 0;	
+	/* synth_now->volume = 0; */	
 }
 
