@@ -11,7 +11,7 @@
 
 
 /// CHANGEME!!!!!
-#define CASTLEVANIA
+#define NYAN
 
 #ifdef MARIO
 // mario
@@ -45,6 +45,12 @@
 // secret
 #include "NeverGonnaGiveYouUpDbmajor.h"
 #define SONGDATA   secret
+#define TEMPO      120
+#endif
+
+#ifdef NYAN
+#include "ID-Nyan_Cat.h"
+#define SONGDATA   nyan
 #define TEMPO      120
 #endif
 
@@ -84,6 +90,10 @@ void main(int argc, char **argv)
 	}
 
 #endif
+#ifdef NYAN
+
+#endif
+
 
 	uint32_t timebase;
 	timebase = time();
